@@ -1,0 +1,30 @@
+version: "3"
+services:
+  mysql:
+    image: "mysql:5.7"
+    container_name: mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    restart: always
+    env_file: .env
+    volumes:
+      - data-mysql:/var/lib/mysql
+      - ./init-sqls/mcms-${MCMS_VERSION}.sql:/docker-entrypoint-initdb.d/mcms-${MCMS_VERSION}.sql
+
+  mcms:
+    build:
+      context: .
+      args:
+        MCMS_VERSION: ${MCMS_VERSION}
+    image: mcms:${MCMS_VERSION}
+    container_name: mcms
+    restart: always
+    env_file: .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+
+volumes:
+  data-mysql:
